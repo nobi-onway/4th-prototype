@@ -6,14 +6,17 @@ public class SpawnManager : MonoBehaviour
 {
     [SerializeField]
     private GameObject _enemyPrefab;
+    [SerializeField]
+    private GameObject _powerUpPrefab;
     private const float SPAWN_RANGE = 9.0f;
+    private int _spawnCount = 1;
+    private Queue<EnemyController> _enemyQueue;
 
-    private const float SPAWN_DELAY = 1.5f;
-    private const float SPAWN_INTERVAL = 3.0f;
 
     void Start()
     {
-        InvokeRepeating(nameof(SpawnEnemy), SPAWN_DELAY, SPAWN_INTERVAL);
+        _enemyQueue = new Queue<EnemyController>();
+        SpawnEnemyWave(_spawnCount);
     }
 
     private Vector3 GenerateSpawnPosition()
@@ -24,8 +27,25 @@ public class SpawnManager : MonoBehaviour
         return new Vector3(spawnPosX, 0, spawnPosZ);
     }
 
-    private void SpawnEnemy()
+    private void SpawnEnemyWave(int numsOfEnemy)
     {
-        Instantiate(_enemyPrefab, GenerateSpawnPosition(), Quaternion.identity);
+        for(int i = 0; i < numsOfEnemy; i++)
+        {
+            GameObject enemy = Instantiate(_enemyPrefab, GenerateSpawnPosition(), Quaternion.identity);
+            EnemyController enemyController = enemy.GetComponent<EnemyController>();
+            _enemyQueue.Enqueue(enemyController);
+            enemyController.onDeath += OnEnemyDeath;
+        }
+        Instantiate(_powerUpPrefab, GenerateSpawnPosition(), Quaternion.identity);
+    }
+
+    private void OnEnemyDeath()
+    {
+        _enemyQueue.Dequeue();
+        if (_enemyQueue.Count <= 0)
+        {
+            _spawnCount++;
+            SpawnEnemyWave(_spawnCount);
+        }
     }
 }
