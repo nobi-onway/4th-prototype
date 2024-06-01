@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody _rb;
-    private float FORCE = 10.0f;
+    private float FORCE = 5.0f;
     [SerializeField]
     private GameObject _focalPoint;
     void Start()
